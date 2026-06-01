@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 5001;
 
 // 1. Middlewares
 app.use(cors({
-  origin: ['https://nodevault-glaa.vercel.app', 'http://localhost:5173'],
+  origin: ['https://nodevault-glaa.vercel.app', 'http://localhost:5173', 'https://nodevault-two.vercel.app'],
   credentials: true
 }));
 app.use(express.json());
