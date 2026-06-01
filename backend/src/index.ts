@@ -63,6 +63,10 @@ const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // 4. Health Check Route
+app.get('/', (_req, res) => {
+  res.status(200).json({ message: 'NodeVault API is running', version: '1.0.0' });
+});
+
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'OK', timestamp: new Date() });
 });
