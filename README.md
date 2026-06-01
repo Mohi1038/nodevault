@@ -435,21 +435,19 @@ graph TD
 ### Scaling Recommendations
 
 **Database**
-
-Migrate from SQLite to a managed PostgreSQL cluster. Prisma supports this with a single configuration change. Use read replicas to offload `GET` queries from the primary write node.
+Migrate from SQLite to a managed PostgreSQL cluster (Now implemented using Supabase). Use connection pooling (PgBouncer) for serverless environments to handle high concurrency, and implement read replicas to offload read-heavy traffic.
 
 **Caching**
+Introduce a Redis layer for caching frequently accessed secrets or user profiles. Implement a Cache-Aside pattern where results are served from Redis, reducing the load on the primary PostgreSQL database and improving response times (TTFB).
 
-Introduce a Redis layer in front of the database for `GET /secrets` responses. Invalidate cache entries on any write operation (`POST`, `PUT`, `DELETE`) scoped to the affected user's key namespace.
+**Horizontal Scaling & Failover**
+Since the JWT authentication is stateless, Express server instances can be scaled horizontally across multiple Availability Zones (AZs) behind a Load Balancer (ALB). Deploying as Docker containers managed by Kubernetes (EKS) or ECS allows for automatic health checks and self-healing.
 
-**Horizontal Scaling**
+**Security & Encryption at Rest**
+Implemented password hashing with bcryptjs (10 rounds) and JWT for stateless auth. For enterprise scaling, implement envelope encryption for secret content using AWS KMS or HashiCorp Vault. This ensures that even in the case of a database breach, individual secrets remain encrypted with unique keys.
 
-Because JWT authentication is stateless, any number of Express server instances can run behind a load balancer without shared session state. Deploy instances as Docker containers and orchestrate with Kubernetes or AWS ECS with autoscaling policies based on CPU and memory metrics.
+**Microservice Migration**
+The current layered architecture (Controller -> Service -> Repository) is designed for a clean migration to microservices. The Auth module can be extracted into an independent Identity Provider (IdP), while the Secret module can scale independently to handle heavy CRUD operations.
 
-**Secret Encryption at Rest**
-
-Encrypt the `content` field using envelope encryption before writing to the database. Store the encrypted ciphertext in the `content` column and manage data encryption keys through AWS KMS or HashiCorp Vault. This ensures that a raw database dump exposes no readable secret content.
-
-**Microservice Decomposition**
-
-As the system grows, separate the Auth service from the Vault CRUD service. This allows independent scaling of computationally expensive operations such as bcrypt hashing during high registration traffic, without affecting secret retrieval throughput.
+**Enterprise Logging & Monitoring**
+Integrated Winston structured logging for production auditing. For scaling, logs should be aggregated into an ELK stack (Elasticsearch, Logstash, Kibana) or Datadog for real-time alerting on API failures and performance bottlenecks.
