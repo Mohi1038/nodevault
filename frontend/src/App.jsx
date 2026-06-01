@@ -49,12 +49,15 @@ const Icons = {
 // --- AUTHENTICATION MODULE ---
 const AuthView = ({ theme, toggleTheme }) => {
   const { login, register } = useAuth();
-  const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
+  const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register' | 'forgot'
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('USER');
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -96,7 +99,7 @@ const AuthView = ({ theme, toggleTheme }) => {
     try {
       if (activeTab === 'login') {
         await login(email, password);
-      } else {
+      } else if (activeTab === 'register') {
         await register(email, password, role);
         setSuccessMsg('Account registered successfully! Please log in above.');
         setEmail('');
@@ -104,6 +107,10 @@ const AuthView = ({ theme, toggleTheme }) => {
         setConfirmPassword('');
         setRole('USER');
         setActiveTab('login');
+      } else if (activeTab === 'forgot') {
+        // Mock forgot password for now
+        setSuccessMsg('If an account exists for this email, you will receive a reset link shortly.');
+        setEmail('');
       }
     } catch (err) {
       setErrorMsg(err.message || 'An error occurred. Please try again.');
@@ -140,6 +147,9 @@ const AuthView = ({ theme, toggleTheme }) => {
           >
             Sign Up
           </button>
+          {activeTab === 'forgot' && (
+            <button className="auth-tab active">Reset Password</button>
+          )}
         </div>
 
         {errorMsg && (
@@ -167,30 +177,50 @@ const AuthView = ({ theme, toggleTheme }) => {
             />
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Password</label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="form-input"
-              required
-            />
-          </div>
+          {activeTab !== 'forgot' && (
+            <div className="form-group">
+              <label className="form-label">Password</label>
+              <div className="password-input-wrapper">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="form-input"
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <Icons.EyeOff /> : <Icons.Eye />}
+                </button>
+              </div>
+            </div>
+          )}
 
           {activeTab === 'register' && (
             <>
               <div className="form-group">
                 <label className="form-label">Confirm Password</label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="form-input"
-                  required
-                />
+                <div className="password-input-wrapper">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="form-input"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <Icons.EyeOff /> : <Icons.Eye />}
+                  </button>
+                </div>
               </div>
 
               <div className="form-group">
@@ -207,13 +237,40 @@ const AuthView = ({ theme, toggleTheme }) => {
             </>
           )}
 
+          {activeTab === 'login' && (
+            <div style={{ textAlign: 'right', marginBottom: '16px', marginTop: '-8px' }}>
+              <button
+                type="button"
+                className="text-link"
+                onClick={() => handleTabChange('forgot')}
+                style={{ fontSize: '0.85rem' }}
+              >
+                Forgot Password?
+              </button>
+            </div>
+          )}
+
+          {activeTab === 'forgot' && (
+            <div style={{ textAlign: 'center', marginBottom: '16px', marginTop: '8px' }}>
+              <button
+                type="button"
+                className="text-link"
+                onClick={() => handleTabChange('login')}
+              >
+                Back to Sign In
+              </button>
+            </div>
+          )}
+
           <button
             type="submit"
             className="btn btn-primary"
             disabled={submitting}
             style={{ marginTop: '8px' }}
           >
-            {submitting ? 'Authenticating...' : activeTab === 'login' ? 'Sign In' : 'Sign Up'}
+            {submitting ? 'Authenticating...' : 
+             activeTab === 'login' ? 'Sign In' : 
+             activeTab === 'register' ? 'Sign Up' : 'Send Reset Link'}
           </button>
         </form>
       </div>
