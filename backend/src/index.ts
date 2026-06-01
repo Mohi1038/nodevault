@@ -73,20 +73,9 @@ app.get('/health', (_req, res) => {
 
 // 5. Versioned API Routes
 app.use('/api/v1', apiRouter);
+app.use('/api', apiRouter);
 app.use('/v1', apiRouter); 
-app.use('/', apiRouter); // Catch-all for Vercel stripping prefixes
-
-// FALLBACK FOR VERCEL: Support root /auth paths if needed
-app.use('/auth', apiRouter);
-
-// FALLBACK: Also mount the health check on root just in case
-app.get('/api/v1/health', (_req, res) => {
-  res.status(200).json({ status: 'OK', source: 'manual-v1-health' });
-});
-
-app.get('/v1/auth/login', (_req, res) => {
-  res.status(200).json({ message: 'V1 Login exists' });
-});
+app.use('/', apiRouter);
 
 // 6. Global Central Error Handler (Must be registered last)
 app.use(errorHandler);
