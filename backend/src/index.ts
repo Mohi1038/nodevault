@@ -64,7 +64,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // 4. Health Check Route
 app.get('/', (_req, res) => {
-  res.status(200).json({ message: 'NodeVault API is running', version: '1.0.0' });
+  res.status(200).json({ message: 'NodeVault API is running', version: '1.0.1', check: 'apiRouter should work' });
 });
 
 app.get('/health', (_req, res) => {
@@ -76,6 +76,16 @@ app.use('/api/v1', apiRouter);
 app.use('/api', apiRouter);
 app.use('/v1', apiRouter); 
 app.use('/', apiRouter);
+
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({
+    message: 'Route not found',
+    path: req.path,
+    url: req.url,
+    method: req.method
+  });
+});
 
 // 6. Global Central Error Handler (Must be registered last)
 app.use(errorHandler);
