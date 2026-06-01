@@ -74,6 +74,9 @@ app.get('/health', (_req, res) => {
 // 5. Versioned API Routes
 app.use('/api/v1', apiRouter);
 
+// FALLBACK FOR VERCEL: Support root /auth paths if needed
+app.use('/auth', apiRouter);
+
 // 6. Global Central Error Handler (Must be registered last)
 app.use(errorHandler);
 
